@@ -1,0 +1,30 @@
+config wifi-device  radio0
+        option type             'mac80211'
+        option channel          '6'
+        option hwmode           '11g'
+        option path             '10180000.wmac'
+        option htmode           'HT20'
+        option log_level        '0'
+        option country          'US'
+        # UNCOMMENT NEXT LINE TO DISABLE WIFI:
+        #option disabled 1
+
+# By default make an AP
+config wifi-iface
+        option device           'radio0'
+        option network          'apwan'
+        option mode             'ap'
+        option ssid             'NixCore'
+        option encryption       'none'
+        option key              'none'
+	option isolate		0
+
+# Example WPA2 station mode client
+#config wifi-iface
+#        option device           'radio0'
+#        option network          'wwan'
+#        option mode             'sta'
+#        option ssid             'SomeNet'
+#        option encryption       'psk2'
+#        option key              '[MYKEYHERE]'
+#	option isolate		0

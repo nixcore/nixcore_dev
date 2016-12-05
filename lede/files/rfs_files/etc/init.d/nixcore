@@ -1,0 +1,24 @@
+#!/bin/sh /etc/rc.common
+
+START=25
+STOP=25
+
+VER=`cat /etc/nixcore_version`
+
+boot() {
+    # Cmds to be run on boot
+    echo "NixCore X1 $VER Boot"
+    # Start the receive server on serial 0 at 57600
+    #rxsrvr.bin -s /dev/ttyS0 -b 57600 > /dev/null &
+    #wifi_make_ap.sh NixCoreAP
+}
+
+start() {
+    # Cmds to run when explicit "start" is called
+    echo "NixCore X1 $VER Start"
+}
+
+stop() {
+    # Cmds to run when "stop" is called
+    echo "NixCore X1 $VER Stop"
+}
