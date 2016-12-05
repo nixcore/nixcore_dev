@@ -1,0 +1,76 @@
+<html><head>
+<title>NixCore</title>
+<link rel="stylesheet" type="text/css" href="./main.css">
+<script type="text/javascript" src="colorpicker.min.js"></script>
+<script src="nixcore.js"></script>
+<style type="text/css">
+  #picker { width: 300px; height: 250px }
+  #slider { width: 100%; height: 250px }
+  input {font-size:20px}
+</style>
+<script type="text/javascript">
+function load(){
+var var1 = getQueryVariable("colorval");
+if(var1)
+{
+    document.getElementById("allcontent").style.backgroundColor = "#"+var1;
+    //document.body.style.backgroundColor = "#"+var1;
+    document.getElementById("colorval").value = "#"+var1;
+}
+var1 = getQueryVariable("device");
+if(var1)
+{
+    document.getElementById("device").value = var1;
+}
+var1 = getQueryVariable("num");
+if(var1)
+{
+    document.getElementById("num").value = var1;
+}
+}
+</script>
+</head>
+<body onload="load()">
+<div id="doc">
+    <div id="allcontent" style="border-bottom:1px solid #000000;background:#EEEEEE">
+        <div id="headerpic">
+            <img src="header_new.jpg">
+        </div>
+        <div id="main" style="padding:10px;text-align:center">
+<!-- Start -->
+    <h1 style="width:100%;font-align:center">RGB LED Color Picker</h1><br />
+    <div id="picker" style="margin-left:340px;float:left;margin-right:10px;display:none;"></div>
+    <div id="slider" style="float:left"></div>
+    <script type="text/javascript">
+      ColorPicker(
+        document.getElementById('slider'),
+        document.getElementById('picker'),
+        function(hex, hsv, rgb) {
+          console.log(hsv.h, hsv.s, hsv.v);         // [0-359], [0-1], [0-1]
+          console.log(rgb.r, rgb.g, rgb.b);         // [0-255], [0-255], [0-255]
+          //document.body.style.backgroundColor = hex;        // #HEX
+          document.getElementById("allcontent").style.backgroundColor = hex;
+          document.getElementById("colorval").value = hex;
+            st = "colorval=%23"+hex.substring(1)+"&device=%2Fdev%2Fspidev1.0&num=52";
+            //alert(st);
+            ajaxcgi_multi('color.cgi',st)
+        });
+    </script>
+    <div style="clear:both" /><br />
+    <form method="post" action="./cgi-bin/color.cgi" style="font-size:20px;display:none;">
+        Color:  &nbsp;<input type="text" id="colorval" name="colorval" value="#FFFFFF" /><br />
+        Device:<input type="text" id="device" name="device" value="/dev/spidev1.0" /><br />
+        Pixels: &nbsp;<input type="text" id="num" name="num" value="52" /><br /><br />
+        <input type="submit" value="Set this Color" />
+    </form>
+
+    <h1 style="margin-top:30px"><a href="http://192.168.1.1/index.html">Back to Main Page</a></h1>
+<!-- End -->
+</div>
+    </div>
+    </div>
+    <div id="footer">
+Nixcore
+    </div>
+</div>
+</div></body></html>
