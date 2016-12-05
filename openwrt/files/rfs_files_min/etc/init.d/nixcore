@@ -1,0 +1,21 @@
+#!/bin/sh /etc/rc.common
+
+START=25
+STOP=25
+
+VER=`cat /etc/nixcore_version`
+
+boot() {
+    # Cmds to be run on boot
+    echo "NixCore X1 $VER Boot"
+}
+
+start() {
+    # Cmds to run when explicit "start" is called
+    echo "NixCore X1 $VER Start"
+}
+
+stop() {
+    # Cmds to run when "stop" is called
+    echo "NixCore X1 $VER Stop"
+}
