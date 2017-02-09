@@ -1,0 +1,90 @@
+######################################################################
+#
+# Makefile for AWS Embedded C SDK for NixCore
+#
+# Version: 1.0
+# Feb 2017
+#
+######################################################################
+
+#This target is to ensure accidental execution of Makefile as a bash
+#script will not execute commands like rm in unexpected directories
+#and exit gracefully.
+.prevent_execution:
+	exit 0
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Change this to the staging dir and toolchain path for the
+# NixCore SDK install
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+STAGING_DIR_NIX = 
+CC = $(STAGING_DIR_NIX)toolchain-xxxxxxx/bin/yyyyyyyy-gcc
+
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# Change this for the path the AWS SDK is in
+# !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+IOT_CLIENT_DIR = aws_sdk
+
+# No more changes required below here
+
+#remove @ for no make command prints
+DEBUG = @
+
+PLATFORM_DIR = $(IOT_CLIENT_DIR)/platform/linux/mbedtls
+PLATFORM_COMMON_DIR = $(IOT_CLIENT_DIR)/platform/linux/common
+
+IOT_INCLUDE_DIRS += -I $(IOT_CLIENT_DIR)/include
+IOT_INCLUDE_DIRS += -I $(IOT_CLIENT_DIR)/external_libs/jsmn
+IOT_INCLUDE_DIRS += -I $(PLATFORM_COMMON_DIR)
+IOT_INCLUDE_DIRS += -I $(PLATFORM_DIR)
+
+IOT_SRC_FILES += $(shell find $(IOT_CLIENT_DIR)/src/ -name '*.c')
+IOT_SRC_FILES += $(shell find $(IOT_CLIENT_DIR)/external_libs/jsmn -name '*.c')
+IOT_SRC_FILES += $(shell find $(PLATFORM_DIR)/ -name '*.c')
+IOT_SRC_FILES += $(shell find $(PLATFORM_COMMON_DIR)/ -name '*.c')
+
+IOT_OBJ_FILES += $(shell find $(IOT_CLIENT_DIR)/src/ -name '*.o')
+IOT_OBJ_FILES += $(shell find $(IOT_CLIENT_DIR)/external_libs/jsmn -name '*.o')
+IOT_OBJ_FILES += $(shell find $(PLATFORM_DIR)/ -name '*.o')
+IOT_OBJ_FILES += $(shell find $(PLATFORM_COMMON_DIR)/ -name '*.o')
+
+#TLS - mbedtls
+MBEDTLS_DIR = $(IOT_CLIENT_DIR)/external_libs/mbedTLS
+TLS_LIB_DIR = $(MBEDTLS_DIR)/library
+TLS_INCLUDE_DIR = -I $(MBEDTLS_DIR)/include
+EXTERNAL_LIBS += -L$(TLS_LIB_DIR)
+LD_FLAG += -Wl,-rpath,$(TLS_LIB_DIR)
+LD_FLAG += -ldl $(TLS_LIB_DIR)/libmbedtls.a 
+LD_FLAG += $(TLS_LIB_DIR)/libmbedcrypto.a
+LD_FLAG += $(TLS_LIB_DIR)/libmbedx509.a -lpthread
+
+#Aggregate all include and src directories
+INC_ALL_DIRS += $(IOT_INCLUDE_DIRS)
+INC_ALL_DIRS += $(TLS_INCLUDE_DIR)
+INC_ALL_DIRS += -I .
+
+SRC_FILES += $(IOT_SRC_FILES)
+
+# Logging level control
+LOG_FLAGS += -DENABLE_IOT_DEBUG
+LOG_FLAGS += -DENABLE_IOT_INFO
+LOG_FLAGS += -DENABLE_IOT_WARN
+LOG_FLAGS += -DENABLE_IOT_ERROR
+
+COMPILER_FLAGS += $(LOG_FLAGS)
+#If the processor is big endian uncomment the compiler flag
+#COMPILER_FLAGS += -DREVERSED
+
+all: libAwsIotSdk.a
+	$(PRE_MAKE_CMD)
+	$(POST_MAKE_CMD)
+
+libAwsIotSdk.a: $(SRC_FILES:.c=.o)
+	ar rcs $@ $^
+
+%.o : %.c
+	$(CC) -c $< -o $@ $(COMPILER_FLAGS) $(EXTERNAL_LIBS) $(INC_ALL_DIRS)
+
+clean:
+	rm -f libAwsIotSdk.a
+	rm -f $(IOT_OBJ_FILES)
